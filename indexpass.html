@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZK设备控制</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        button:last-child {
+            margin-right: 0;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ZK设备控制</h1>
+        <label for="ip_address">IP地址:</label>
+        <select id="ip_address" name="ip_address">
+            <option value="10.150.220.25">10.150.220.25</option>
+            <option value="192.168.1.100">192.168.1.100</option>
+            <option value="192.168.2.200">192.168.2.200</option>
+            <!-- Add more options as needed -->
+        </select><br><br>
+        <label for="time">时间:</label>
+        <input type="datetime-local" id="time" name="time"><br><br>
+
+        <!-- Add password input -->
+        <label for="password">密码:</label>
+        <input type="password" id="password" name="password" placeholder="请输入密码"><br><br>
+
+        <button onclick="getDeviceInfo()">获取设备信息</button>
+        <button onclick="setDeviceTime()">设置设备时间</button>
+        <button onclick="getDeviceTime()">获取设备时间</button>
+        <button onclick="updateDeviceTime()">同步设备时间</button>
+    </div>
+
+    <script>
+        function getDeviceInfo() {
+            var ip_address = document.getElementById("ip_address").value;
+            var password = document.getElementById("password").value;
+            sendData(ip_address, password, "deviceinfo");
+        }
+
+        function setDeviceTime() {
+            var ip_address = document.getElementById("ip_address").value;
+            var localTime = document.getElementById("time").value;
+            var password = document.getElementById("password").value;
+            var dateObj = new Date(localTime);
+            var utcTime = new Date(dateObj.getTime() - (dateObj.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
+            sendData(ip_address, password, "devicetime", { new_time: utcTime });
+        }
+
+        function getDeviceTime() {
+            var ip_address = document.getElementById("ip_address").value;
+            var password = document.getElementById("password").value;
+            sendData(ip_address, password, "gettime");
+        }
+
+        function updateDeviceTime() {
+            var ip_address = document.getElementById("ip_address").value;
+            var password = document.getElementById("password").value;
+            sendData(ip_address, password, "uptimenow");
+        }
+
+        function sendData(ip, password, endpoint, additionalData = {}) {
+            var data = { ip: ip, password: password, ...additionalData };
+            fetch(`api地址/${endpoint}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(JSON.stringify(data));
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
